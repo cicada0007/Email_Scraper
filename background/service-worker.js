@@ -16,7 +16,7 @@ import {
   exportCSVMilestone,
   buildExportCsv,
   downloadFileBackground,
-} from "../utils/export.js";
+} from "../utils/export-background.js";
 import {
   addSearchHistory,
   extractGoogleQuery,

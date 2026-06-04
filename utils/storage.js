@@ -42,14 +42,16 @@ export async function saveSettings(patch) {
  */
 async function getStorageArea() {
   const { persistLocal } = await getSettings();
-  return persistLocal ? chrome.storage.local : chrome.storage.session;
+  if (persistLocal) return chrome.storage.local;
+  // Fallback if session storage is unavailable (older Chrome)
+  return chrome.storage.session ?? chrome.storage.local;
 }
 
 /**
  * @param {number} tabId
  * @returns {Promise<number[]>}
  */
-async function getTriggeredMilestones(tabId) {
+export async function getTriggeredMilestones(tabId) {
   const { [MILESTONES_KEY]: map = {} } = await chrome.storage.local.get(
     MILESTONES_KEY
   );
@@ -191,7 +193,7 @@ export async function getAllEmails() {
   const settings = await getSettings();
   const storage = settings.persistLocal
     ? chrome.storage.local
-    : chrome.storage.session;
+    : chrome.storage.session ?? chrome.storage.local;
 
   const { [TAB_INDEX_KEY]: tabIds = [] } = await chrome.storage.local.get(
     TAB_INDEX_KEY
