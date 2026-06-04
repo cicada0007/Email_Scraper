@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EmailScout</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">⚡</span>
+        <h1>EmailScout</h1>
+      </div>
+      <button type="button" id="btn-help" class="btn-help" aria-label="Help">?</button>
+    </header>
+
+    <nav class="tab-nav" role="tablist">
+      <button type="button" class="tab active" data-tab="emails" role="tab">Emails</button>
+      <button type="button" class="tab" data-tab="tools" role="tab">Tools</button>
+    </nav>
+
+    <div id="panel-emails" class="tab-panel active" role="tabpanel">
+      <section class="stats-section">
+        <p class="stats-label">Found on this page:</p>
+        <div class="stat-card">
+          <p class="stat-text" id="stat-text">0 emails found</p>
+          <span class="live-badge empty" id="live-badge">0</span>
+        </div>
+        <p class="last-scrape" id="last-scrape">Not scanned yet</p>
+      </section>
+
+      <div class="legend" aria-label="Email types">
+        <span><span class="tier-dot tier-personal"></span> Personal</span>
+        <span><span class="tier-dot tier-role"></span> Role</span>
+        <span><span class="tier-dot tier-disposable"></span> Blocked</span>
+      </div>
+
+      <div class="list-controls">
+        <input type="search" id="search" class="search" placeholder="Filter emails…" />
+        <label class="toggle-group">
+          <input type="checkbox" id="group-by-domain" checked />
+          <span>Group by domain</span>
+        </label>
+      </div>
+
+      <div class="email-list-wrap">
+        <div class="email-list" id="email-list" role="list"></div>
+        <p class="empty hidden" id="empty-state">No emails found yet.</p>
+      </div>
+
+      <section class="settings-section compact">
+        <label class="toggle-group">
+          <input type="checkbox" id="accumulate-mode" />
+          <span>Accumulate across searches</span>
+        </label>
+        <label class="toggle-group">
+          <input type="checkbox" id="persist-local" />
+          <span>Persist after restart</span>
+        </label>
+        <label class="toggle-group">
+          <input type="checkbox" id="auto-save" checked />
+          <span>Auto-export at 50 / 100 / 500</span>
+        </label>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-row">
+          <button type="button" id="btn-copy" class="btn btn-primary">Copy All</button>
+          <button type="button" id="btn-csv" class="btn">Export CSV</button>
+        </div>
+        <button type="button" id="btn-clear" class="btn btn-ghost">Clear</button>
+      </footer>
+    </div>
+
+    <div id="panel-tools" class="tab-panel" role="tabpanel" hidden>
+      <section class="tool-section">
+        <h2 class="tool-title">Smart search queries</h2>
+        <input
+          type="text"
+          id="niche-input"
+          class="search"
+          placeholder="e.g. makeup artists in Los Angeles"
+        />
+        <button type="button" id="btn-generate" class="btn btn-primary btn-block">
+          Generate queries
+        </button>
+        <ul class="query-list" id="query-list"></ul>
+      </section>
+
+      <section class="tool-section">
+        <h2 class="tool-title">Scrape all pages</h2>
+        <label class="range-label">
+          Pages (1–10):
+          <input type="range" id="page-count" min="1" max="10" value="3" />
+          <span id="page-count-val">3</span>
+        </label>
+        <button type="button" id="btn-scrape-all" class="btn btn-primary btn-block">
+          Scrape All Pages
+        </button>
+        <div class="progress-wrap hidden" id="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <p class="progress-text" id="progress-text">Scraping page 1/3…</p>
+        </div>
+      </section>
+
+      <section class="tool-section">
+        <h2 class="tool-title">Recent searches</h2>
+        <ul class="history-list" id="history-list"></ul>
+        <p class="empty history-empty hidden" id="history-empty">No search history yet.</p>
+      </section>
+    </div>
+
+    <p class="status" id="status" aria-live="polite"></p>
+
+    <dialog id="help-dialog" class="help-dialog">
+      <h2>EmailScout</h2>
+      <p>Scrape emails from Google Search results automatically.</p>
+      <ul>
+        <li><strong>Emails</strong> — view, filter, and export with color-coded validation</li>
+        <li><strong>Tools</strong> — generate queries, scrape multiple pages, re-run history</li>
+        <li>SERP bar shows live count with View / Export on Google</li>
+      </ul>
+      <button type="button" id="help-close" class="btn btn-primary">Got it</button>
+    </dialog>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
