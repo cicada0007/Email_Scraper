@@ -364,6 +364,17 @@ body {
   background: rgba(255, 107, 138, 0.08);
 }
 
+.btn-dashboard {
+  margin-bottom: 8px;
+  background: rgba(0, 212, 170, 0.12);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn-dashboard:hover {
+  background: rgba(0, 212, 170, 0.22);
+}
+
 .status {
   padding: 4px 16px 10px;
   font-size: 11px;
@@ -454,6 +465,82 @@ body {
   padding: 8px 16px 0;
 }
 
+.verify-section {
+  margin: 0 16px 10px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.verify-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.verify-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.verify-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #3a3a5c;
+  color: var(--muted);
+}
+
+.verify-badge.has-verified {
+  background: rgba(0, 212, 170, 0.2);
+  color: var(--success);
+}
+
+.verify-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.chip.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(108, 99, 255, 0.15);
+}
+
+.chip-verified.active {
+  border-color: var(--success);
+  background: rgba(0, 212, 170, 0.15);
+  color: var(--success);
+}
+
+.btn-verify {
+  font-size: 12px;
+}
+
 .legend {
   display: flex;
   gap: 12px;
@@ -474,8 +561,17 @@ body {
   flex-shrink: 0;
 }
 
+.tier-dot.tier-mx-verified {
+  color: #00d4aa;
+  font-size: 9px;
+}
+
 .tier-dot.tier-personal {
   color: #00d4aa;
+}
+
+.tier-dot.tier-no-mx {
+  color: #f59e0b;
 }
 
 .tier-dot.tier-role {
@@ -485,6 +581,45 @@ body {
 .tier-dot.tier-disposable,
 .tier-dot.tier-invalid {
   color: #ff6b8a;
+}
+
+.email-row.tier-mx-verified {
+  border-left: 2px solid rgba(0, 212, 170, 0.5);
+}
+
+.email-row.tier-no-mx {
+  border-left: 2px solid rgba(245, 158, 11, 0.5);
+}
+
+.chip-nomx.active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+/* Verification progress bar */
+.verify-progress {
+  margin-top: 10px;
+}
+
+.verify-bar {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.verify-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  transition: width 0.4s ease;
+}
+
+.verify-progress-text {
+  margin-top: 5px;
+  font-size: 10px;
+  color: var(--muted);
 }
 
 .email-row {
@@ -560,6 +695,10 @@ body {
 .btn-block {
   width: 100%;
   margin-top: 8px;
+}
+
+.footer .btn-block {
+  margin-bottom: 0;
 }
 
 .query-list,

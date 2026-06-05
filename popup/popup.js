@@ -1,6 +1,6 @@
 import { exportCSV, copyToClipboard } from "../utils/export.js";
 import { STORAGE_KEY } from "../utils/storage.js";
-import { classifyEmail } from "../utils/validate.js";
+import { verifyEmail } from "../utils/validate.js";
 import {
   generateSearchQueries,
   googleSearchUrl,
@@ -37,9 +37,20 @@ const els = {
   progressText: $("#progress-text"),
   historyList: $("#history-list"),
   historyEmpty: $("#history-empty"),
+  dashboardSync: $("#dashboard-sync"),
+  btnDashboard: $("#btn-dashboard"),
   tabs: document.querySelectorAll(".tab"),
   panelEmails: $("#panel-emails"),
   panelTools: $("#panel-tools"),
+  verifyBadge: $("#verify-badge"),
+  verifySummary: $("#verify-summary"),
+  btnVerifyRun: $("#btn-verify-run"),
+  btnCopyVerified: $("#btn-copy-verified"),
+  btnCsvVerified: $("#btn-csv-verified"),
+  filterChips: document.querySelectorAll(".chip[data-filter]"),
+  verifyProgress: $("#verify-progress"),
+  verifyBarFill: $("#verify-bar-fill"),
+  verifyProgressText: $("#verify-progress-text"),
 };
 
 /** @type {import('../utils/storage.js').EmailRecord[]} */
@@ -48,7 +59,25 @@ let lastCount = 0;
 let lastUpdatedAt = null;
 let activeTabId = null;
 let storageKey = null;
+let verificationFilter = "all";
+let isVerifying = false;
 const collapsedDomains = new Set();
+
+/**
+ * Stores deep (MX-checked) verification results keyed by email address.
+ * Populated after "Run MX verification" completes.
+ * @type {Map<string, {tier: string, verified: boolean, label: string, icon: string}>}
+ */
+const deepVerifyResults = new Map();
+
+/**
+ * Returns the best available verification result for an address:
+ * deep MX result if it exists, otherwise the instant static result.
+ * @param {string} address
+ */
+function getEffectiveTierResult(address) {
+  return deepVerifyResults.get(address) || verifyEmail(address);
+}
 
 function setStatus(msg, isError = false) {
   els.status.textContent = msg;
@@ -98,14 +127,54 @@ function updateStats(count, updatedAt) {
 }
 
 function getFilteredRecords() {
+  let list = allRecords;
+
+  if (verificationFilter !== "all") {
+    list = list.filter((r) => {
+      const result = getEffectiveTierResult(r.address);
+      if (verificationFilter === "verified") return result.verified;
+      return result.tier === verificationFilter;
+    });
+  }
+
   const q = els.search.value.trim().toLowerCase();
-  if (!q) return [...allRecords];
-  return allRecords.filter(
+  if (!q) return list;
+  return list.filter(
     (r) =>
       r.address.includes(q) ||
       r.domain.includes(q) ||
       r.pageUrl.toLowerCase().includes(q)
   );
+}
+
+function updateVerificationStats() {
+  const summary = { total: allRecords.length, verified: 0, noMx: 0, role: 0, disposable: 0, invalid: 0 };
+
+  for (const r of allRecords) {
+    const result = getEffectiveTierResult(r.address);
+    if (result.verified) summary.verified++;
+    else if (result.tier === "no-mx") summary.noMx++;
+    else if (result.tier === "role") summary.role++;
+    else if (result.tier === "disposable") summary.disposable++;
+    else summary.invalid++;
+  }
+
+  const hasMxData = deepVerifyResults.size > 0;
+
+  if (els.verifyBadge) {
+    els.verifyBadge.textContent = `${summary.verified} verified`;
+    els.verifyBadge.classList.toggle("has-verified", summary.verified > 0);
+  }
+  if (els.verifySummary) {
+    const parts = [`${summary.verified} verified`];
+    if (hasMxData && summary.noMx > 0) parts.push(`${summary.noMx} no-MX`);
+    if (summary.role > 0) parts.push(`${summary.role} role`);
+    if (summary.disposable > 0) parts.push(`${summary.disposable} blocked`);
+    if (summary.invalid > 0) parts.push(`${summary.invalid} invalid`);
+    parts.push(`of ${summary.total}`);
+    const hint = hasMxData ? "" : " · click Run MX to deep-check domains";
+    els.verifySummary.textContent = parts.join(" · ") + hint;
+  }
 }
 
 function groupByDomain(records) {
@@ -126,7 +195,7 @@ async function copyRecord(record, rowEl) {
 }
 
 function createEmailRow(record) {
-  const { tier, label, icon } = classifyEmail(record.address);
+  const { tier, label, icon } = getEffectiveTierResult(record.address);
   const row = document.createElement("div");
   row.className = `email-row tier-${tier}`;
   row.setAttribute("role", "listitem");
@@ -206,6 +275,7 @@ function applyData(data) {
     }));
 
   updateStats(data.count ?? allRecords.length, data.updatedAt ?? null);
+  updateVerificationStats();
   renderList();
 }
 
@@ -250,6 +320,9 @@ async function load() {
   els.accumulateMode.checked = Boolean(settings.accumulateMode);
   els.persistLocal.checked = Boolean(settings.persistLocal);
   els.autoSave.checked = settings.autoSaveEnabled !== false;
+  if (els.dashboardSync) {
+    els.dashboardSync.checked = settings.dashboardSyncEnabled !== false;
+  }
 
   if (activeTabId != null) {
     await requestFreshScan(activeTabId);
@@ -368,14 +441,153 @@ async function saveSettingsFromUI() {
       accumulateMode: els.accumulateMode.checked,
       persistLocal: els.persistLocal.checked,
       autoSaveEnabled: els.autoSave.checked,
+      dashboardSyncEnabled: els.dashboardSync?.checked ?? true,
     },
   });
   setStatus("Settings saved");
 }
 
+const DASHBOARD_URL = "http://localhost:3847";
+
+els.btnDashboard?.addEventListener("click", async () => {
+  await sendMessage({ type: "SYNC_DASHBOARD", tabId: activeTabId });
+  chrome.tabs.create({ url: DASHBOARD_URL });
+  setStatus("Opening dashboard…");
+});
+
+els.dashboardSync?.addEventListener("change", saveSettingsFromUI);
+
 // Events
 els.search.addEventListener("input", renderList);
 els.groupByDomain.addEventListener("change", renderList);
+
+els.filterChips?.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    els.filterChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    verificationFilter = chip.dataset.filter || "all";
+    renderList();
+    const label =
+      verificationFilter === "verified"
+        ? "Showing verified emails only"
+        : verificationFilter === "all"
+          ? "Showing all emails"
+          : `Showing ${verificationFilter} emails`;
+    setStatus(label);
+  });
+});
+
+function setVerifyProgress(pct, text) {
+  if (!els.verifyProgress || !els.verifyBarFill || !els.verifyProgressText) return;
+  els.verifyProgress.classList.remove("hidden");
+  els.verifyBarFill.style.width = `${pct}%`;
+  els.verifyProgressText.textContent = text;
+}
+
+function hideVerifyProgress() {
+  els.verifyProgress?.classList.add("hidden");
+  if (els.verifyBarFill) els.verifyBarFill.style.width = "0%";
+}
+
+function setupVerifyListener() {
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "VERIFY_PROGRESS") {
+      if (msg.phase === "instant") {
+        // Apply instant results immediately so rows update before MX starts
+        for (const [address, result] of Object.entries(msg.results || {})) {
+          deepVerifyResults.set(address, result);
+        }
+        updateVerificationStats();
+        renderList();
+        setVerifyProgress(0, `Checking ${msg.domainsTotal || "…"} domains via DNS…`);
+      } else if (msg.phase === "mx") {
+        const pct = msg.domainsTotal > 0
+          ? Math.round((msg.domainsDone / msg.domainsTotal) * 100)
+          : 0;
+        setVerifyProgress(pct, `DNS lookup: ${msg.domainsDone}/${msg.domainsTotal} domains`);
+      }
+    }
+
+    if (msg.type === "VERIFY_COMPLETE") {
+      isVerifying = false;
+      if (els.btnVerifyRun) {
+        els.btnVerifyRun.disabled = false;
+        els.btnVerifyRun.textContent = "Run MX verification";
+      }
+
+      for (const [address, result] of Object.entries(msg.results || {})) {
+        deepVerifyResults.set(address, result);
+      }
+
+      updateVerificationStats();
+      renderList();
+
+      // Switch to verified filter to show confirmed results
+      verificationFilter = "verified";
+      els.filterChips?.forEach((c) => {
+        c.classList.toggle("active", c.dataset.filter === "verified");
+      });
+      renderList();
+
+      const verified = [...deepVerifyResults.values()].filter((r) => r.verified).length;
+      const noMx = [...deepVerifyResults.values()].filter((r) => r.tier === "no-mx").length;
+
+      setVerifyProgress(100, `Done — ${verified} verified · ${noMx} no-MX domains filtered`);
+      setTimeout(hideVerifyProgress, 4000);
+
+      setStatus(`MX check complete: ${verified} deliverable emails found`);
+    }
+  });
+}
+
+els.btnVerifyRun?.addEventListener("click", async () => {
+  if (isVerifying) return;
+  if (!allRecords.length) return setStatus("No emails to verify.", true);
+
+  isVerifying = true;
+  deepVerifyResults.clear();
+
+  if (els.btnVerifyRun) {
+    els.btnVerifyRun.disabled = true;
+    els.btnVerifyRun.textContent = "Verifying…";
+  }
+
+  const uniqueDomains = [...new Set(allRecords.map((r) => r.domain).filter(Boolean))];
+  setVerifyProgress(0, `Starting — ${uniqueDomains.length} unique domain(s) to check`);
+
+  const res = await sendMessage({
+    type: "VERIFY_EMAILS",
+    records: allRecords.map((r) => ({ address: r.address, domain: r.domain })),
+  });
+
+  if (!res?.ok) {
+    isVerifying = false;
+    if (els.btnVerifyRun) {
+      els.btnVerifyRun.disabled = false;
+      els.btnVerifyRun.textContent = "Run MX verification";
+    }
+    hideVerifyProgress();
+    setStatus("Verification failed — reload the extension.", true);
+  }
+});
+
+function getVerifiedRecords() {
+  return allRecords.filter((r) => getEffectiveTierResult(r.address).verified);
+}
+
+els.btnCopyVerified?.addEventListener("click", async () => {
+  const list = getVerifiedRecords();
+  if (!list.length) return setStatus("No verified emails.", true);
+  await copyToClipboard(list);
+  setStatus(`Copied ${list.length} verified email(s)`);
+});
+
+els.btnCsvVerified?.addEventListener("click", () => {
+  const list = getVerifiedRecords();
+  if (!list.length) return setStatus("No verified emails.", true);
+  exportCSV(list, "emailscout-verified.csv");
+  setStatus(`Exported ${list.length} verified email(s)`);
+});
 
 els.btnCopy.addEventListener("click", async () => {
   const list = getFilteredRecords();
@@ -446,6 +658,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 setupTabs();
 setupProgressListener();
+setupVerifyListener();
 load();
 setInterval(async () => {
   if (activeTabId == null) return;

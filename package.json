@@ -1,0 +1,10 @@
+{
+  "name": "emailscout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EmailScout Chrome extension + localhost dashboard",
+  "scripts": {
+    "start": "node dashboard/server.js",
+    "dashboard": "node dashboard/server.js"
+  }
+}

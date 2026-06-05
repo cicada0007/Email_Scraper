@@ -17,6 +17,9 @@ const DEFAULT_SETTINGS = {
   /** Auto-export CSV at count milestones. */
   autoSaveEnabled: true,
   autoSaveMilestones: [50, 100, 500],
+  /** Push results to localhost dashboard (npm start). */
+  dashboardSyncEnabled: true,
+  dashboardUrl: "http://localhost:3847",
 };
 
 /**

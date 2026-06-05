@@ -22,6 +22,13 @@ import {
   extractGoogleQuery,
   getSearchHistory,
 } from "../utils/search-history.js";
+import {
+  syncTabToDashboard,
+  clearTabOnDashboard,
+  syncAllToDashboard,
+} from "../utils/dashboard-sync.js";
+import { verifyEmail, applyMxToResult } from "../utils/validate.js";
+import { batchVerifyDomains } from "../utils/mx-verify.js";
 
 const BADGE_COLOR = "#6c63ff";
 const BADGE_COLOR_EMPTY = "#3a3a5c";
@@ -113,7 +120,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const stored = await getEmails(tabId);
 
       await updateBadge(tabId, merged.length);
-      if (stored) await checkAutoSaveMilestones(tabId, stored);
+      if (stored) {
+        await checkAutoSaveMilestones(tabId, stored);
+        await syncTabToDashboard(tabId, stored);
+      }
 
       const searchQuery = extractGoogleQuery(pageUrl);
       if (searchQuery) {
@@ -157,6 +167,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse(toEmailDataResponse(stored));
     })();
 
+    return true;
+  }
+
+  if (message.type === "SYNC_DASHBOARD") {
+    (async () => {
+      const queryTabId = message.tabId ?? tabId;
+      if (queryTabId != null) {
+        const stored = await getEmails(queryTabId);
+        await syncTabToDashboard(queryTabId, stored);
+      } else {
+        await syncAllToDashboard();
+      }
+      sendResponse({ ok: true });
+    })();
     return true;
   }
 
@@ -216,6 +240,58 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
 
+  if (message.type === "VERIFY_EMAILS") {
+    // Deep verification: instant checks + async MX record lookup.
+    const records = message.records || []; // [{ address, domain }]
+
+    (async () => {
+      // Phase 1 — instant static checks (sync, zero latency)
+      const instantResults = {};
+      for (const { address } of records) {
+        instantResults[address] = verifyEmail(address);
+      }
+
+      chrome.runtime.sendMessage({
+        type: "VERIFY_PROGRESS",
+        phase: "instant",
+        results: instantResults,
+        domainsDone: 0,
+        domainsTotal: 0,
+      }).catch(() => {});
+
+      // Phase 2 — MX record lookup for unique domains
+      const domains = [...new Set(
+        records.map((r) => r.domain || r.address.split("@")[1] || "").filter(Boolean)
+      )];
+
+      const mxMap = await batchVerifyDomains(domains, (done, total) => {
+        chrome.runtime.sendMessage({
+          type: "VERIFY_PROGRESS",
+          phase: "mx",
+          domainsDone: done,
+          domainsTotal: total,
+        }).catch(() => {});
+      });
+
+      // Phase 3 — merge MX results into instant results
+      const finalResults = {};
+      for (const { address, domain } of records) {
+        const d = domain || address.split("@")[1] || "";
+        const mxStatus = mxMap.get(d) || "error";
+        finalResults[address] = applyMxToResult(instantResults[address], mxStatus);
+      }
+
+      chrome.runtime.sendMessage({
+        type: "VERIFY_COMPLETE",
+        results: finalResults,
+      }).catch(() => {});
+
+      sendResponse({ ok: true, count: records.length });
+    })();
+
+    return true;
+  }
+
   if (message.type === "CLEAR_EMAILS") {
     const clearTabId = message.tabId ?? tabId;
     if (clearTabId == null) {
@@ -225,6 +301,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     (async () => {
       await clearEmails(clearTabId);
+      await clearTabOnDashboard(clearTabId);
       await updateBadge(clearTabId, 0);
       sendResponse(toEmailDataResponse(null));
     })();

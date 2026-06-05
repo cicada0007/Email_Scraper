@@ -2,3 +2,5 @@
 *.log
 .env
 .env.*
+dashboard/data.json
+node_modules/

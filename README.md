@@ -63,6 +63,22 @@ Chrome extension (Manifest V3) to scrape emails from Google Search results.
 - **Search history** — last 20 queries with re-run
 - **SERP notification bar** — fixed top bar with View mini-list + Export
 
+## Localhost dashboard
+
+View all scraped emails in a full-page UI (separate from the popup).
+
+```bash
+cd /Users/scriptonia/Movies/Email_scraper
+npm start
+```
+
+Open **http://localhost:3847** — the page auto-refreshes every 2 seconds.
+
+1. Keep **Sync to localhost dashboard** enabled in the extension popup
+2. Reload the extension after pulling this update
+3. Scrape Google SERP emails — they appear on the dashboard live
+4. Or click **Open Dashboard (localhost:3847)** in the popup
+
 ## Install (developer mode)
 
 1. Open `chrome://extensions`

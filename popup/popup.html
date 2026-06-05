@@ -30,8 +30,32 @@
         <p class="last-scrape" id="last-scrape">Not scanned yet</p>
       </section>
 
+      <section class="verify-section">
+        <div class="verify-header">
+          <span class="verify-title">✓ Email Verifier</span>
+          <span class="verify-badge" id="verify-badge">0 verified</span>
+        </div>
+        <p class="verify-hint" id="verify-summary">Checks syntax, TLD, disposable & role addresses</p>
+        <div class="filter-chips" role="group" aria-label="Verification filter">
+          <button type="button" class="chip active" data-filter="all">All</button>
+          <button type="button" class="chip chip-verified" data-filter="verified">Verified</button>
+          <button type="button" class="chip chip-nomx" data-filter="no-mx">No MX</button>
+          <button type="button" class="chip" data-filter="role">Role</button>
+          <button type="button" class="chip" data-filter="disposable">Blocked</button>
+        </div>
+        <button type="button" id="btn-verify-run" class="btn btn-verify btn-block">
+          Run MX verification
+        </button>
+        <div class="verify-progress hidden" id="verify-progress">
+          <div class="verify-bar"><div class="verify-bar-fill" id="verify-bar-fill"></div></div>
+          <p class="verify-progress-text" id="verify-progress-text">Checking domains…</p>
+        </div>
+      </section>
+
       <div class="legend" aria-label="Email types">
-        <span><span class="tier-dot tier-personal"></span> Personal</span>
+        <span><span class="tier-dot tier-mx-verified">✅</span> MX OK</span>
+        <span><span class="tier-dot tier-personal"></span> Likely</span>
+        <span><span class="tier-dot tier-no-mx"></span> No MX</span>
         <span><span class="tier-dot tier-role"></span> Role</span>
         <span><span class="tier-dot tier-disposable"></span> Blocked</span>
       </div>
@@ -62,12 +86,23 @@
           <input type="checkbox" id="auto-save" checked />
           <span>Auto-export at 50 / 100 / 500</span>
         </label>
+        <label class="toggle-group">
+          <input type="checkbox" id="dashboard-sync" checked />
+          <span>Sync to localhost dashboard</span>
+        </label>
       </section>
 
       <footer class="footer">
+        <button type="button" id="btn-dashboard" class="btn btn-dashboard btn-block">
+          Open Dashboard (localhost:3847)
+        </button>
         <div class="footer-row">
-          <button type="button" id="btn-copy" class="btn btn-primary">Copy All</button>
-          <button type="button" id="btn-csv" class="btn">Export CSV</button>
+          <button type="button" id="btn-copy-verified" class="btn btn-primary">Copy Verified</button>
+          <button type="button" id="btn-copy" class="btn">Copy All</button>
+        </div>
+        <div class="footer-row">
+          <button type="button" id="btn-csv-verified" class="btn">Export Verified</button>
+          <button type="button" id="btn-csv" class="btn">Export All</button>
         </div>
         <button type="button" id="btn-clear" class="btn btn-ghost">Clear</button>
       </footer>

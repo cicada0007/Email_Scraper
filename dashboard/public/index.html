@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EmailScout Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1>EmailScout Dashboard</h1>
+          <p class="subtitle">Live results from your Chrome extension</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="status-pill" id="status-pill">Connecting…</span>
+        <button type="button" id="btn-refresh" class="btn">Refresh</button>
+        <button type="button" id="btn-export" class="btn btn-primary">Export CSV</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total emails</span>
+          <span class="stat-value" id="stat-count">0</span>
+        </div>
+        <div class="stat-card highlight">
+          <span class="stat-label">✓ Verified</span>
+          <span class="stat-value verified" id="stat-verified">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Role / Blocked</span>
+          <span class="stat-value small" id="stat-rejected">0</span>
+        </div>
+        <div class="stat-card wide">
+          <span class="stat-label">Last updated</span>
+          <span class="stat-value small" id="stat-updated">—</span>
+        </div>
+      </section>
+
+      <section class="verify-panel">
+        <h2>✓ Email Verifier</h2>
+        <p id="verify-detail">Client-side checks: syntax · TLD · not disposable · not role-based</p>
+        <div class="filter-chips">
+          <button type="button" class="chip active" data-filter="all">All</button>
+          <button type="button" class="chip chip-verified" data-filter="verified">Verified only</button>
+          <button type="button" class="chip" data-filter="role">Role</button>
+          <button type="button" class="chip" data-filter="disposable">Blocked</button>
+        </div>
+        <button type="button" id="btn-verify" class="btn btn-primary">Run verification</button>
+        <button type="button" id="btn-export-verified" class="btn">Export verified CSV</button>
+      </section>
+
+      <section class="toolbar">
+        <input
+          type="search"
+          id="filter"
+          class="search"
+          placeholder="Filter by email or domain…"
+        />
+        <label class="toggle">
+          <input type="checkbox" id="group-domain" checked />
+          Group by domain
+        </label>
+      </section>
+
+      <section class="table-wrap">
+        <table class="email-table" id="email-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Email</th>
+              <th>Domain</th>
+              <th>Found on page</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <p class="empty hidden" id="empty-msg">
+          No emails yet. Run a Google search with the EmailScout extension loaded.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Start server: <code>npm start</code> · Extension must have
+        <strong>Sync to localhost dashboard</strong> enabled
+      </p>
+    </footer>
+
+    <script src="verify.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
