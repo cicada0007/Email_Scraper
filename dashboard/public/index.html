@@ -3,16 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EmailScout Dashboard</title>
+    <title>TouchMail Dashboard</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
     <header class="header">
       <div class="brand">
-        <span class="brand-icon">⚡</span>
-        <div>
-          <h1>EmailScout Dashboard</h1>
-          <p class="subtitle">Live results from your Chrome extension</p>
+        <div class="brand-mark" aria-hidden="true">
+          <img src="/logo.png" alt="" width="36" height="36" style="display:block;">
+        </div>
+        <div class="brand-text">
+          <h1>TouchMail</h1>
+          <p>Find verified emails with a single touch.</p>
         </div>
       </div>
       <div class="header-actions">
@@ -23,51 +27,99 @@
     </header>
 
     <main class="main">
+
+      <!-- ── Stats ────────────────────────────────────────────────────── -->
       <section class="stats-grid">
         <div class="stat-card">
           <span class="stat-label">Total emails</span>
           <span class="stat-value" id="stat-count">0</span>
         </div>
         <div class="stat-card highlight">
-          <span class="stat-label">✓ Verified</span>
+          <span class="stat-label">Verified</span>
           <span class="stat-value verified" id="stat-verified">0</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Role / Blocked</span>
           <span class="stat-value small" id="stat-rejected">0</span>
         </div>
-        <div class="stat-card wide">
+        <div class="stat-card">
           <span class="stat-label">Last updated</span>
           <span class="stat-value small" id="stat-updated">—</span>
         </div>
       </section>
 
+      <!-- ── Verify panel ──────────────────────────────────────────────── -->
       <section class="verify-panel">
-        <h2>✓ Email Verifier</h2>
-        <p id="verify-detail">Client-side checks: syntax · TLD · not disposable · not role-based</p>
+        <h2>Email Verification</h2>
+        <p id="verify-detail">Syntax · TLD · not disposable · not role-based</p>
+
         <div class="filter-chips">
           <button type="button" class="chip active" data-filter="all">All</button>
-          <button type="button" class="chip chip-verified" data-filter="verified">Verified only</button>
+          <button type="button" class="chip chip-verified" data-filter="verified">✓ Verified</button>
           <button type="button" class="chip" data-filter="role">Role</button>
           <button type="button" class="chip" data-filter="disposable">Blocked</button>
         </div>
-        <button type="button" id="btn-verify" class="btn btn-primary">Run verification</button>
-        <button type="button" id="btn-export-verified" class="btn">Export verified CSV</button>
+
+        <div class="verify-actions">
+          <button type="button" id="btn-verify" class="btn btn-primary">Run verification</button>
+          <button type="button" id="btn-smtp-verify" class="btn btn-smtp">🔌 SMTP Verify Live</button>
+          <button type="button" id="btn-export-verified" class="btn">Export verified CSV</button>
+        </div>
+
+        <div id="smtp-progress" class="smtp-progress hidden">
+          <div class="smtp-progress-bar">
+            <div id="smtp-progress-fill" class="smtp-progress-fill"></div>
+          </div>
+          <span id="smtp-progress-label" class="smtp-progress-label">Pinging mailboxes…</span>
+        </div>
       </section>
 
+      <!-- ── Import panel ────────────────────────────────────────────────── -->
+      <section class="import-panel">
+        <div class="import-top">
+          <div>
+            <h2>Import Emails</h2>
+            <p>Upload a CSV / TXT file or paste a raw list — imported emails go straight into the verify queue</p>
+          </div>
+          <span id="import-status" class="import-status"></span>
+        </div>
+
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Drop CSV file here to import">
+          <input type="file" id="csv-file-input" accept=".csv,.txt,.tsv" hidden>
+          <span class="drop-icon">⬆</span>
+          <span class="drop-primary">Drop CSV or TXT here</span>
+          <span class="drop-secondary">or <button type="button" class="link-btn" id="browse-btn">browse files</button></span>
+        </div>
+
+        <textarea
+          id="paste-input"
+          class="import-textarea"
+          placeholder="Or paste emails / CSV rows here — one per line or comma-separated…"
+          rows="3"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="import-actions">
+          <button type="button" id="btn-import" class="btn btn-primary">Import &amp; Add to List</button>
+          <button type="button" id="btn-clear-imported" class="btn">Clear Imported</button>
+        </div>
+      </section>
+
+      <!-- ── Toolbar ───────────────────────────────────────────────────── -->
       <section class="toolbar">
         <input
           type="search"
           id="filter"
           class="search"
-          placeholder="Filter by email or domain…"
+          placeholder="Filter by email, domain, or URL…"
         />
         <label class="toggle">
           <input type="checkbox" id="group-domain" checked />
-          Group by domain
+          <span>Group by domain</span>
         </label>
       </section>
 
+      <!-- ── Table ─────────────────────────────────────────────────────── -->
       <section class="table-wrap">
         <table class="email-table" id="email-table">
           <thead>
@@ -82,16 +134,14 @@
           <tbody id="table-body"></tbody>
         </table>
         <p class="empty hidden" id="empty-msg">
-          No emails yet. Run a Google search with the EmailScout extension loaded.
+          No emails yet. Run a Google search with the TouchMail extension active.
         </p>
       </section>
+
     </main>
 
     <footer class="footer">
-      <p>
-        Start server: <code>npm start</code> · Extension must have
-        <strong>Sync to localhost dashboard</strong> enabled
-      </p>
+      <p>Start: <code>npm start</code> or open the <strong>TouchMail</strong> desktop app · Extension must have <strong>Sync to dashboard</strong> enabled</p>
     </footer>
 
     <script src="verify.js"></script>

@@ -5,9 +5,9 @@
 
 export const STORAGE_KEY = (tabId) => `emails_tab_${tabId}`;
 
-const SETTINGS_KEY = "emailscout_settings";
-const MILESTONES_KEY = "emailscout_milestones";
-const TAB_INDEX_KEY = "emailscout_tab_index";
+const SETTINGS_KEY = "touchmail_settings";
+const MILESTONES_KEY = "touchmail_milestones";
+const TAB_INDEX_KEY = "touchmail_tab_index";
 
 const DEFAULT_SETTINGS = {
   /** Session storage; cleared when tab closes (via cleanupTab). */

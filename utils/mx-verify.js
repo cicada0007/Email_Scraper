@@ -4,7 +4,7 @@
  * Results cached 24h in chrome.storage.local to avoid redundant lookups.
  */
 
-const MX_CACHE_KEY = "emailscout_mx_cache";
+const MX_CACHE_KEY = "touchmail_mx_cache";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const BATCH_SIZE = 5;
 const BATCH_DELAY_MS = 200;

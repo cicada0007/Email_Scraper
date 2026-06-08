@@ -38,7 +38,6 @@ const els = {
   historyList: $("#history-list"),
   historyEmpty: $("#history-empty"),
   dashboardSync: $("#dashboard-sync"),
-  btnDashboard: $("#btn-dashboard"),
   tabs: document.querySelectorAll(".tab"),
   panelEmails: $("#panel-emails"),
   panelTools: $("#panel-tools"),
@@ -112,10 +111,8 @@ function pulseBadge() {
 }
 
 function updateStats(count, updatedAt) {
-  const label = count === 1 ? "1 email found" : `${count} emails found`;
-  els.statText.textContent = label;
+  els.statText.textContent = count === 1 ? "email found" : "emails found";
   els.liveBadge.textContent = count > 99 ? "99+" : String(count);
-  els.liveBadge.classList.toggle("empty", count === 0);
   if (count !== lastCount) {
     if (count > lastCount) pulseBadge();
     lastCount = count;
@@ -449,11 +446,6 @@ async function saveSettingsFromUI() {
 
 const DASHBOARD_URL = "http://localhost:3847";
 
-els.btnDashboard?.addEventListener("click", async () => {
-  await sendMessage({ type: "SYNC_DASHBOARD", tabId: activeTabId });
-  chrome.tabs.create({ url: DASHBOARD_URL });
-  setStatus("Opening dashboard…");
-});
 
 els.dashboardSync?.addEventListener("change", saveSettingsFromUI);
 
@@ -585,7 +577,7 @@ els.btnCopyVerified?.addEventListener("click", async () => {
 els.btnCsvVerified?.addEventListener("click", () => {
   const list = getVerifiedRecords();
   if (!list.length) return setStatus("No verified emails.", true);
-  exportCSV(list, "emailscout-verified.csv");
+  exportCSV(list, "touchmail-verified.csv");
   setStatus(`Exported ${list.length} verified email(s)`);
 });
 
@@ -599,7 +591,7 @@ els.btnCopy.addEventListener("click", async () => {
 els.btnCsv.addEventListener("click", () => {
   const list = getFilteredRecords();
   if (!list.length) return setStatus("Nothing to export.", true);
-  exportCSV(list, "emailscout-export.csv");
+  exportCSV(list, "touchmail-export.csv");
   setStatus(`Exported ${list.length} email(s)`);
 });
 
@@ -653,7 +645,7 @@ els.helpClose.addEventListener("click", () => els.helpDialog.close());
 
 chrome.storage.onChanged.addListener((changes, area) => {
   handleStorageChange(changes, area);
-  if (changes.emailscout_search_history) loadSearchHistory();
+  if (changes.touchmail_search_history) loadSearchHistory();
 });
 
 setupTabs();

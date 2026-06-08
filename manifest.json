@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "EmailScout — Email Finder",
+  "name": "TouchMail — Email Finder",
   "version": "1.0.0",
-  "description": "Scrape emails from Google Search results instantly",
+  "description": "Find verified emails with a single touch. Extract, verify, and export email addresses directly from Google search results.",
   "permissions": [
     "activeTab",
     "storage",
@@ -22,7 +22,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["utils/regex.js", "utils/export.js"],
+      "resources": ["utils/regex.js", "utils/export.js", "icons/icon-128.png"],
       "matches": [
         "https://www.google.com/*",
         "https://google.com/*"
@@ -42,10 +42,16 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_icon": { "48": "icons/icon-48.png" }
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
   "icons": {
     "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   }

@@ -2,7 +2,7 @@
  * Recent Google search history (last 20).
  */
 
-const HISTORY_KEY = "emailscout_search_history";
+const HISTORY_KEY = "touchmail_search_history";
 const MAX_ENTRIES = 20;
 
 /**

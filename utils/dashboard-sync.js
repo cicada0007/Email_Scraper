@@ -36,7 +36,7 @@ export async function syncTabToDashboard(tabId, data) {
       }),
     });
   } catch (err) {
-    console.warn("[EmailScout] Dashboard sync failed:", err.message);
+    console.warn("[TouchMail] Dashboard sync failed:", err.message);
   }
 }
 
@@ -60,7 +60,7 @@ export async function syncAllToDashboard() {
       }),
     });
   } catch (err) {
-    console.warn("[EmailScout] Dashboard full sync failed:", err.message);
+    console.warn("[TouchMail] Dashboard full sync failed:", err.message);
   }
 }
 

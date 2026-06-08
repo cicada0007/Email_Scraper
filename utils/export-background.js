@@ -54,5 +54,5 @@ export function downloadFileBackground(content, filename) {
 
 export function exportCSVMilestone(emails, milestone) {
   const csv = buildExportCsv(emails);
-  return downloadFileBackground(csv, `emailscout-${milestone}-emails.csv`);
+  return downloadFileBackground(csv, `touchmail-${milestone}-emails.csv`);
 }

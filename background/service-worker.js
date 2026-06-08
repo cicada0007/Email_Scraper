@@ -65,9 +65,9 @@ async function checkAutoSaveMilestones(tabId, data) {
       try {
         await exportCSVMilestone(data.records, milestone);
         await markMilestoneTriggered(tabId, milestone);
-        console.log(`[EmailScout] Auto-export at ${milestone} emails`);
+        console.log(`[TouchMail] Auto-export at ${milestone} emails`);
       } catch (err) {
-        console.warn("[EmailScout] Auto-export failed:", err);
+        console.warn("[TouchMail] Auto-export failed:", err);
       }
     }
   }
@@ -98,7 +98,7 @@ function toEmailDataResponse(stored) {
 }
 
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log(`[EmailScout] ${details.reason}`);
+  console.log(`[TouchMail] ${details.reason}`);
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -140,7 +140,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       console.log(
-        `[EmailScout] Tab ${tabId}: ${merged.length} email(s)`,
+        `[TouchMail] Tab ${tabId}: ${merged.length} email(s)`,
         merged.map((r) => r.address)
       );
 
@@ -227,7 +227,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
       const csv = buildExportCsv(records);
-      await downloadFileBackground(csv, "emailscout-export.csv");
+      await downloadFileBackground(csv, "touchmail-export.csv");
       sendResponse({ ok: true, count: records.length });
     })();
 

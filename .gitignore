@@ -4,3 +4,5 @@
 .env.*
 dashboard/data.json
 node_modules/
+dist/
+build-assets/

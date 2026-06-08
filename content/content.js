@@ -29,7 +29,7 @@
     "a#pnnext",
   ];
 
-  const BAR_ID = "emailscout-serp-bar";
+  const BAR_ID = "touchmail-serp-bar";
   const PAGE_DELAY_MS = 2000;
 
   let observer = null;
@@ -83,7 +83,7 @@
     bar.id = BAR_ID;
     bar.innerHTML = `
       <div class="es-bar-inner">
-        <span class="es-bar-brand">⚡ EmailScout</span>
+        <span class="es-bar-brand">TouchMail</span>
         <span class="es-bar-msg">found <strong class="es-bar-count">0 emails</strong> on this page</span>
         <div class="es-bar-actions">
           <button type="button" class="es-bar-btn" data-action="view">View</button>
@@ -96,7 +96,7 @@
 
     bar.addEventListener("click", onBarClick);
     document.documentElement.prepend(bar);
-    document.documentElement.classList.add("emailscout-bar-active");
+    document.documentElement.classList.add("touchmail-bar-active");
   }
 
   function onBarClick(e) {
@@ -106,7 +106,7 @@
     const action = btn.dataset.action;
     if (action === "dismiss") {
       document.getElementById(BAR_ID)?.remove();
-      document.documentElement.classList.remove("emailscout-bar-active");
+      document.documentElement.classList.remove("touchmail-bar-active");
       return;
     }
     if (action === "view") {
@@ -157,7 +157,7 @@
     const pageEmails = emails.length;
     updateNotificationBar(pageEmails);
 
-    console.log("[EmailScout] Extracted emails:", emails);
+    console.log("[TouchMail] Extracted emails:", emails);
 
     chrome.runtime.sendMessage(
       {
@@ -167,12 +167,12 @@
       },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.warn("[EmailScout]", chrome.runtime.lastError.message);
+          console.warn("[TouchMail]", chrome.runtime.lastError.message);
           return;
         }
         if (response?.count != null) {
           console.log(
-            `[EmailScout] Stored ${response.count} email(s) for this tab`
+            `[TouchMail] Stored ${response.count} email(s) for this tab`
           );
         }
       }
@@ -310,12 +310,12 @@
     try {
       ({ extractEmails } = await import(regexUrl));
     } catch (err) {
-      console.error("[EmailScout] Failed to load regex module:", err);
+      console.error("[TouchMail] Failed to load regex module:", err);
       return;
     }
 
     ensureNotificationBar();
-    console.log("[EmailScout] SERP scraper ready");
+    console.log("[TouchMail] SERP scraper ready");
     waitForSearchRoot();
 
     chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

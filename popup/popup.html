@@ -3,48 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EmailScout</title>
+    <title>TouchMail</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
     <header class="header">
       <div class="brand">
-        <span class="brand-icon" aria-hidden="true">⚡</span>
-        <h1>EmailScout</h1>
+        <div class="brand-mark" aria-hidden="true">
+          <img src="../icons/icon-128.png" alt="" width="28" height="28" style="display:block;">
+        </div>
+        <h1>TouchMail</h1>
       </div>
-      <button type="button" id="btn-help" class="btn-help" aria-label="Help">?</button>
+      <div class="header-right">
+        <button type="button" id="btn-help" class="icon-btn" aria-label="Help">?</button>
+      </div>
     </header>
 
-    <nav class="tab-nav" role="tablist">
-      <button type="button" class="tab active" data-tab="emails" role="tab">Emails</button>
-      <button type="button" class="tab" data-tab="tools" role="tab">Tools</button>
-    </nav>
-
+    <!-- ── Emails panel ─────────────────────────────────────────────────── -->
     <div id="panel-emails" class="tab-panel active" role="tabpanel">
-      <section class="stats-section">
-        <p class="stats-label">Found on this page:</p>
-        <div class="stat-card">
-          <p class="stat-text" id="stat-text">0 emails found</p>
-          <span class="live-badge empty" id="live-badge">0</span>
-        </div>
-        <p class="last-scrape" id="last-scrape">Not scanned yet</p>
-      </section>
 
-      <section class="verify-section">
-        <div class="verify-header">
-          <span class="verify-title">✓ Email Verifier</span>
-          <span class="verify-badge" id="verify-badge">0 verified</span>
+      <!-- Hero stat -->
+      <div class="hero">
+        <div class="hero-left">
+          <span class="hero-num" id="live-badge">0</span>
+          <div class="hero-meta">
+            <span class="hero-label" id="stat-text">emails found</span>
+            <span class="hero-time" id="last-scrape">not scanned yet</span>
+          </div>
         </div>
-        <p class="verify-hint" id="verify-summary">Checks syntax, TLD, disposable & role addresses</p>
-        <div class="filter-chips" role="group" aria-label="Verification filter">
+        <span class="verified-pill" id="verify-badge">0 verified</span>
+      </div>
+
+      <!-- Verify card -->
+      <section class="verify-section" style="margin: 0 12px 10px;">
+        <div class="verify-header">
+          <span class="verify-title">Email Verification</span>
+        </div>
+        <p class="verify-hint" id="verify-summary">Syntax · TLD · disposable · role · MX DNS</p>
+        <div class="filter-chips" role="group" aria-label="Filter" style="padding: 0 0 10px; overflow-x: auto;">
           <button type="button" class="chip active" data-filter="all">All</button>
-          <button type="button" class="chip chip-verified" data-filter="verified">Verified</button>
+          <button type="button" class="chip chip-verified" data-filter="verified">✓ Verified</button>
           <button type="button" class="chip chip-nomx" data-filter="no-mx">No MX</button>
           <button type="button" class="chip" data-filter="role">Role</button>
           <button type="button" class="chip" data-filter="disposable">Blocked</button>
         </div>
-        <button type="button" id="btn-verify-run" class="btn btn-verify btn-block">
-          Run MX verification
+        <button type="button" id="btn-verify-run" class="btn btn-primary btn-block btn-verify">
+          Run MX Verification
         </button>
         <div class="verify-progress hidden" id="verify-progress">
           <div class="verify-bar"><div class="verify-bar-fill" id="verify-bar-fill"></div></div>
@@ -52,27 +58,31 @@
         </div>
       </section>
 
-      <div class="legend" aria-label="Email types">
-        <span><span class="tier-dot tier-mx-verified">✅</span> MX OK</span>
-        <span><span class="tier-dot tier-personal"></span> Likely</span>
-        <span><span class="tier-dot tier-no-mx"></span> No MX</span>
-        <span><span class="tier-dot tier-role"></span> Role</span>
-        <span><span class="tier-dot tier-disposable"></span> Blocked</span>
+      <!-- Tier legend -->
+      <div class="legend" aria-label="Tier key">
+        <span><span class="tier-dot tier-mx-verified">●</span> MX verified</span>
+        <span><span class="tier-dot tier-personal">●</span> Likely valid</span>
+        <span><span class="tier-dot tier-no-mx">●</span> No MX</span>
+        <span><span class="tier-dot tier-role">●</span> Role</span>
+        <span><span class="tier-dot tier-disposable">●</span> Blocked</span>
       </div>
 
+      <!-- Search + group toggle -->
       <div class="list-controls">
         <input type="search" id="search" class="search" placeholder="Filter emails…" />
         <label class="toggle-group">
           <input type="checkbox" id="group-by-domain" checked />
-          <span>Group by domain</span>
+          <span>Group</span>
         </label>
       </div>
 
+      <!-- Email list -->
       <div class="email-list-wrap">
         <div class="email-list" id="email-list" role="list"></div>
-        <p class="empty hidden" id="empty-state">No emails found yet.</p>
+        <p class="empty hidden" id="empty-state">No emails found yet.<br>Open a Google Search page.</p>
       </div>
 
+      <!-- Settings toggles -->
       <section class="settings-section compact">
         <label class="toggle-group">
           <input type="checkbox" id="accumulate-mode" />
@@ -88,27 +98,27 @@
         </label>
         <label class="toggle-group">
           <input type="checkbox" id="dashboard-sync" checked />
-          <span>Sync to localhost dashboard</span>
+          <span>Sync to dashboard</span>
         </label>
       </section>
 
+      <!-- Action footer -->
       <footer class="footer">
-        <button type="button" id="btn-dashboard" class="btn btn-dashboard btn-block">
-          Open Dashboard (localhost:3847)
-        </button>
         <div class="footer-row">
           <button type="button" id="btn-copy-verified" class="btn btn-primary">Copy Verified</button>
           <button type="button" id="btn-copy" class="btn">Copy All</button>
         </div>
         <div class="footer-row">
-          <button type="button" id="btn-csv-verified" class="btn">Export Verified</button>
+          <button type="button" id="btn-csv-verified" class="btn">Export Verified CSV</button>
           <button type="button" id="btn-csv" class="btn">Export All</button>
         </div>
-        <button type="button" id="btn-clear" class="btn btn-ghost">Clear</button>
+        <button type="button" id="btn-clear" class="btn btn-ghost btn-block">Clear emails</button>
       </footer>
     </div>
 
+    <!-- ── Tools panel ───────────────────────────────────────────────────── -->
     <div id="panel-tools" class="tab-panel" role="tabpanel" hidden>
+
       <section class="tool-section">
         <h2 class="tool-title">Smart search queries</h2>
         <input
@@ -117,7 +127,7 @@
           class="search"
           placeholder="e.g. makeup artists in Los Angeles"
         />
-        <button type="button" id="btn-generate" class="btn btn-primary btn-block">
+        <button type="button" id="btn-generate" class="btn btn-primary btn-block" style="margin-top:8px;">
           Generate queries
         </button>
         <ul class="query-list" id="query-list"></ul>
@@ -126,16 +136,16 @@
       <section class="tool-section">
         <h2 class="tool-title">Scrape all pages</h2>
         <label class="range-label">
-          Pages (1–10):
+          <span>Pages (1–10)</span>
           <input type="range" id="page-count" min="1" max="10" value="3" />
           <span id="page-count-val">3</span>
         </label>
-        <button type="button" id="btn-scrape-all" class="btn btn-primary btn-block">
+        <button type="button" id="btn-scrape-all" class="btn btn-primary btn-block" style="margin-top:8px;">
           Scrape All Pages
         </button>
         <div class="progress-wrap hidden" id="progress-wrap">
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <p class="progress-text" id="progress-text">Scraping page 1/3…</p>
+          <p class="progress-text" id="progress-text">Scraping…</p>
         </div>
       </section>
 
@@ -144,19 +154,28 @@
         <ul class="history-list" id="history-list"></ul>
         <p class="empty history-empty hidden" id="history-empty">No search history yet.</p>
       </section>
+
     </div>
 
+    <!-- ── Status / toast ────────────────────────────────────────────────── -->
     <p class="status" id="status" aria-live="polite"></p>
 
+    <!-- ── Tab navigation (bottom) ──────────────────────────────────────── -->
+    <nav class="tab-nav" role="tablist">
+      <button type="button" class="tab active" data-tab="emails" role="tab">Emails</button>
+      <button type="button" class="tab" data-tab="tools" role="tab">Tools</button>
+    </nav>
+
+    <!-- ── Help dialog ───────────────────────────────────────────────────── -->
     <dialog id="help-dialog" class="help-dialog">
-      <h2>EmailScout</h2>
-      <p>Scrape emails from Google Search results automatically.</p>
+      <h2>TouchMail</h2>
+      <p>Find verified emails with a single touch. Extract and verify emails directly from Google search results.</p>
       <ul>
-        <li><strong>Emails</strong> — view, filter, and export with color-coded validation</li>
-        <li><strong>Tools</strong> — generate queries, scrape multiple pages, re-run history</li>
-        <li>SERP bar shows live count with View / Export on Google</li>
+        <li><strong>Emails</strong> — filter, verify, and export with tier badges</li>
+        <li><strong>Tools</strong> — generate niche queries, multi-page scrape, re-run history</li>
+        <li>The SERP bar shows a live count on every search page</li>
       </ul>
-      <button type="button" id="help-close" class="btn btn-primary">Got it</button>
+      <button type="button" id="help-close" class="btn btn-primary" style="margin-top:12px;">Got it</button>
     </dialog>
 
     <script type="module" src="popup.js"></script>
